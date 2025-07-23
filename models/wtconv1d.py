@@ -141,7 +141,14 @@ class WTConv1d(nn.Module):
         self.iwt_function = partial(inverse_wavelet_transform_1d, filters=self.iwt_filter)
 
         # 基础卷积和缩放模块
-        self.base_conv = nn.Conv1d(in_channels, in_channels, kernel_size, padding='same', stride=1, bias=bias)
+        # self.base_conv = nn.Conv1d(in_channels, in_channels, kernel_size, padding='same', stride=1, bias=bias)
+        self.base_conv = nn.Sequential(
+            # Depthwise convolution
+            nn.Conv1d(in_channels, in_channels, kernel_size, padding='same', stride=1, groups=in_channels, bias=bias),
+
+            # Pointwise convolution
+            nn.Conv1d(in_channels, in_channels, kernel_size=1, stride=1, padding=0, bias=bias)
+        )
         self.base_scale = _ScaleModule([1, in_channels, 1])
 
         # 小波卷积和缩放模块（用于高频和低频特征提取）
